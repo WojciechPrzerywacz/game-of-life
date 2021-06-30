@@ -1,138 +1,43 @@
 import "./index.css";
-import React, { useState, useEffect, useRef } from "react";
-import { Cell } from "./Cell.js";
-
-const neighbourOffsets = [
-  [0, 1],
-  [0, -1],
-  [1, -1],
-  [-1, 1],
-  [1, 1],
-  [-1, -1],
-  [1, 0],
-  [-1, 0],
-];
+import React, { useState, useEffect } from "react";
+import { clear, clickGenerate, nextStep } from "./functions.js";
 
 export default function App() {
-  const [rowsNum, setRowsNum] = useState(Math.floor(window.innerHeight / 30));
-  const [columnsNum, setColumnsNum] = useState(
-    Math.floor(window.innerWidth / 30)
-  );
+  const heightModifier = Math.floor(window.innerHeight / 30);
+  const widthModifier = Math.floor(window.innerWidth / 30);
+  const [rowsNum, setRowsNum] = useState(heightModifier);
+  const [columnsNum, setColumnsNum] = useState(widthModifier);
+
+  const [running, setRunning] = useState(false);
+  const [cellsArr, setCellsArr] = useState(clear(rowsNum, columnsNum));
+
+  const [speed, setSpeed] = useState(100);
+  const [selected, setSelect] = useState("oneCell");
+
+  useEffect(() => {
+    const simulate = () => {
+      if (running) {
+        console.log(selected);
+        setCellsArr(nextStep(cellsArr, rowsNum, columnsNum));
+      }
+    };
+
+    setTimeout(() => {
+      simulate();
+    }, speed);
+  }, [running, cellsArr, columnsNum, rowsNum, speed, selected]);
 
   useEffect(() => {
     const handleResize = () => {
-      setCellsArr(generate(rowsNum, columnsNum));
-      setColumnsNum(Math.floor(window.innerWidth / 30));
-      setRowsNum(Math.floor(window.innerHeight / 30));
+      setCellsArr(clear(rowsNum, columnsNum));
+      setColumnsNum(widthModifier);
+      setRowsNum(heightModifier);
     };
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  });
-
-  const calculateNeighboursCount = (arr, i, j) => {
-    let aliveNeighboursAmount = 0;
-
-    for (const neighbourOffsetKey in neighbourOffsets) {
-      const [xOffset, yOffset] = neighbourOffsets[neighbourOffsetKey];
-
-      let newColumnOffset = j + xOffset;
-      let newRowOffset = i + yOffset;
-
-      if (newColumnOffset < 0 || newColumnOffset > columnsNum - 1) {
-        continue;
-      }
-      if (newRowOffset < 0 || newRowOffset > rowsNum - 1) {
-        continue;
-      }
-      const neighbourState =
-        arr[newColumnOffset + newRowOffset * columnsNum].props.isAlive;
-      if (neighbourState === true) {
-        aliveNeighboursAmount++;
-      }
-    }
-    console.log("NEXT");
-    console.log(aliveNeighboursAmount);
-    console.log("NEXT");
-
-    return aliveNeighboursAmount;
-  };
-
-  const generate = (rows, column) => {
-    const cellsArrCpy = [];
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < column; j++) {
-        cellsArrCpy.push(
-          <Cell
-            key={(j + i * columnsNum).toString()}
-            row={i}
-            column={j}
-            isAlive={Math.random() < 0.4}
-          ></Cell>
-        );
-      }
-    }
-    return cellsArrCpy;
-  };
-
-  const nextStep = (cellsArray) => {
-    if (!running) {
-      return cellsArray;
-    }
-    const cellsArrCpy = [];
-    for (let i = 0; i < rowsNum; i++) {
-      for (let j = 0; j < columnsNum; j++) {
-        let neigbours = calculateNeighboursCount(cellsArray, i, j);
-        if (
-          cellsArray[j + i * columnsNum].props.isAlive === true &&
-          (neigbours < 2 || neigbours > 3)
-        ) {
-          //umiera
-          cellsArrCpy.push(<Cell row={i} column={j} isAlive={false}></Cell>);
-        }
-        if (
-          cellsArray[j + i * columnsNum].props.isAlive === true &&
-          (neigbours === 2 || neigbours === 3)
-        ) {
-          //żyje
-          cellsArrCpy.push(<Cell row={i} column={j} isAlive={true}></Cell>);
-        }
-
-        if (
-          cellsArray[j + i * columnsNum].props.isAlive === false &&
-          neigbours === 3
-        ) {
-          //żyje
-          cellsArrCpy.push(<Cell row={i} column={j} isAlive={true}></Cell>);
-        }
-
-        if (
-          cellsArray[j + i * columnsNum].props.isAlive === false &&
-          neigbours !== 3
-        ) {
-          //nie żyje tak jak wcześniej nie żył
-          cellsArrCpy.push(<Cell row={i} column={j} isAlive={false}></Cell>);
-        }
-      }
-    }
-    //setTimeout(nextStep(cellsArrCpy), 100)
-    return cellsArrCpy;
-  };
-
-  const simulate = () => {
-    setCellsArr(nextStep(cellsArr));
-    //setTimeout(simulate, 1000);
-  };
-
-  const [running, setRunning] = useState(false);
-  const [cellsArr, setCellsArr] = useState(generate(rowsNum, columnsNum));
-
-  const cellsArrRef = React.useRef(cellsArr);
-  const setCellsRef = (data) => {
-    cellsArrRef.current = data;
-    setCellsArr(data);
-  };
+  }, [rowsNum, columnsNum, heightModifier, widthModifier]);
 
   return (
     <div className="flex">
@@ -141,27 +46,56 @@ export default function App() {
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${columnsNum}, 20px)`,
-          gridGap: "0px",
+          gridGap: "0",
         }}
       >
-        {cellsArr}
+        {cellsArr.map((value, index) => (
+          <div
+            key={index}
+            style={{
+              height: "20px",
+              width: "20px",
+              border: "1px solid gray",
+              boxSizing: "border-box",
+              WebkitBoxSizing: "border-box",
+            }}
+            onClick={() =>
+              setCellsArr(
+                clickGenerate(index, cellsArr, columnsNum, rowsNum, selected)
+              )
+            }
+            className={value ? "cellAlive" : "cellDead"}
+          ></div>
+        ))}
       </div>
-      <button
-        onClick={() => setRunning(running ? false : true)}
-        className={"buttons"}
-      >
-        {running ? "Stop Game" : "Start Game"}
-      </button>
-      <button
-        onClick={() => setCellsArr(generate(rowsNum, columnsNum))}
-        className={"buttons"}
-      >
-        Generate
-      </button>
-      <button onClick={simulate} className={"buttons"}>
-        Next Step
-      </button>
+      <div className="buttons-wrapper">
+        <button
+          onClick={() => setRunning(running ? false : true)}
+          className={"buttons"}
+        >
+          {running ? "Stop Game" : "Start Game"}
+        </button>
+        <button
+          onClick={() => setCellsArr(clear(rowsNum, columnsNum))}
+          className={"buttons"}
+        >
+          Clear
+        </button>
+
+        <input
+          type="text"
+          value={speed}
+          onChange={(event) => setSpeed(event.target.value)}
+        />
+        <div className="dropdown">
+          <button className="dropbtn">Dropdown</button>
+          <div className="dropdown-content">
+            <div onClick={() => setSelect("oneCell")}>One Cell</div>
+            <div onClick={() => setSelect("threeCells")}>Three Cells</div>
+            <div onClick={() => setSelect("glider")}>Glider</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-//setInterval(() => setCellsArr(nextStep(cellsArr)), 1000);
