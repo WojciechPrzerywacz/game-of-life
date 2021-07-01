@@ -1,6 +1,5 @@
 import "./index.css";
-import React, { useState, useEffect } from "react";
-import { clear, clickGenerate, nextStep, update } from "./functions.js";
+import React from "react";
 
 export const SpeedInput = (props) => {
   //console.log(props);

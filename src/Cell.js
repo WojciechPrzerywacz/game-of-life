@@ -1,31 +1,23 @@
 import "./index.css";
 import React from "react";
-import { clear, clickGenerate, nextStep, update } from "./functions.js";
+import { clickGenerate, update } from "./functions.js";
 
 export const Cell = (props) => {
-  const {} = props;
+  const { running, rowsNum, columnsNum, index, selected, cellsArr, updateArr } =
+    props;
   return (
     <div
-      key={props.index}
+      key={index}
       onClick={() => {
-        if (props.selected === "defaultMode" && !props.running) {
-          props.setUpdate(update(props.index, props.cellsArr));
-        } else if (!props.running) {
-          props.setGenerated(
-            clickGenerate(
-              props.index,
-              props.cellsArr,
-              props.columnsNum,
-              props.rowsNum,
-              props.selected
-            )
+        if (selected === "defaultMode" && !running) {
+          updateArr(update(index, cellsArr));
+        } else if (!running) {
+          updateArr(
+            clickGenerate(index, cellsArr, columnsNum, rowsNum, selected)
           );
         }
       }}
-      //onMouseOverCapture={() => setColor("green")}
-      className={
-        props.cellsArr[props.index] ? "cellAlive cell" : "cellDead cell"
-      }
+      className={cellsArr[index] ? "cellAlive cell" : "cellDead cell"}
     ></div>
   );
 };

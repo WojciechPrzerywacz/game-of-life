@@ -1,11 +1,10 @@
 import "./index.css";
 import React from "react";
-import { clear, clickGenerate, nextStep, update } from "./functions.js";
 
 export const Button = (props) => {
-  const { name, event, func } = props;
+  const { name, func } = props;
   return (
-    <button className={"buttons"} onClick={() => func(event)}>
+    <button className={"buttons"} onClick={func}>
       {name}
     </button>
   );

@@ -1,12 +1,6 @@
 import "./index.css";
 import React, { useState, useEffect } from "react";
-import {
-  clear,
-  clickGenerate,
-  nextStep,
-  update,
-  resizeUpdate,
-} from "./functions.js";
+import { clear, nextStep, resizeUpdate } from "./functions.js";
 import { Cell } from "./Cell";
 import { Button } from "./Button";
 import { SpeedInput } from "./SpeedInput";
@@ -23,6 +17,18 @@ export default function App() {
 
   const [speed, setSpeed] = useState(100);
   const [selected, setSelect] = useState("defaultMode");
+
+  const goToNextStep = () => {
+    setCellsArr(nextStep(cellsArr, rowsNum, columnsNum));
+  };
+
+  const clearBoard = () => {
+    setCellsArr(clear(rowsNum, columnsNum));
+  };
+
+  const toggleRunningState = () => {
+    setRunning(!running);
+  };
 
   useEffect(() => {
     const simulate = () => {
@@ -60,35 +66,26 @@ export default function App() {
       >
         {cellsArr.map((value, index) => (
           <Cell
+            key={index}
             running={running}
             rowsNum={rowsNum}
             columnsNum={columnsNum}
             index={index}
             selected={selected}
             cellsArr={cellsArr}
-            setUpdate={setCellsArr}
-            setGenerated={setCellsArr}
+            updateArr={setCellsArr}
           />
         ))}
       </div>
       <div className="buttons-wrapper">
         <Button
           name={running ? "Start Game" : "Stop Game"}
-          event={!running}
-          func={setRunning}
+          func={toggleRunningState}
         />
 
-        <Button
-          name="Clear"
-          event={() => clear(rowsNum, columnsNum)}
-          func={setCellsArr}
-        />
+        <Button name="Clear" func={clearBoard} />
 
-        <Button
-          name="Next Step"
-          event={() => nextStep(cellsArr, rowsNum, columnsNum)}
-          func={setCellsArr}
-        />
+        <Button name="Next Step" func={goToNextStep} />
 
         <SpeedInput speed={speed} changeSpeed={setSpeed} />
 
