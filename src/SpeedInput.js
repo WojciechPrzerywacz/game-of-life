@@ -4,14 +4,14 @@ import { clear, clickGenerate, nextStep, update } from "./functions.js";
 
 export const SpeedInput = (props) => {
   //console.log(props);
-
+  const { speed, changeSpeed } = props;
   return (
     <div className="flex">
-      <p className="text-holder">Current speed: {props.speed}</p>
+      <p className="text-holder">Current speed: {speed}</p>
       <input
         type="text"
         placeholder="Change game speed (ms)"
-        onChange={(event) => props.changeSpeed(event.target.value)}
+        onChange={(event) => changeSpeed(event.target.value)}
       />
     </div>
   );

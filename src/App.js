@@ -13,8 +13,8 @@ import { SpeedInput } from "./SpeedInput";
 import { DropdownMenu } from "./DropdownMenu";
 
 export default function App() {
-  const heightModifier = Math.floor(window.innerHeight / 60);
-  const widthModifier = Math.floor(window.innerWidth / 60);
+  const heightModifier = Math.floor(window.innerHeight / 40);
+  const widthModifier = Math.floor(window.innerWidth / 40);
   const [rowsNum, setRowsNum] = useState(heightModifier);
   const [columnsNum, setColumnsNum] = useState(widthModifier);
 
@@ -40,8 +40,8 @@ export default function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      setColumnsNum(Math.floor(window.innerWidth / 50));
-      setRowsNum(Math.floor(window.innerHeight / 50));
+      setColumnsNum(Math.floor(window.innerWidth / 40));
+      setRowsNum(Math.floor(window.innerHeight / 40));
       setCellsArr(resizeUpdate(cellsArr, rowsNum, columnsNum));
     };
     window.addEventListener("resize", handleResize);
@@ -66,31 +66,33 @@ export default function App() {
             index={index}
             selected={selected}
             cellsArr={cellsArr}
-            setUpdate={(arr) => setCellsArr(arr)}
-            setGenerated={(arr) => setCellsArr(arr)}
-          ></Cell>
+            setUpdate={setCellsArr}
+            setGenerated={setCellsArr}
+          />
         ))}
       </div>
       <div className="buttons-wrapper">
         <Button
-          rowsNum={rowsNum}
-          columnsNum={columnsNum}
-          running={running}
-          cellsArr={cellsArr}
-          stopGame={(run) => setRunning(run)}
-          clearBoard={(arr) => setCellsArr(arr)}
-          goToNextStep={(arr) => setCellsArr(arr)}
-        ></Button>
+          name={running ? "Start Game" : "Stop Game"}
+          event={!running}
+          func={setRunning}
+        />
 
-        <SpeedInput
-          speed={speed}
-          changeSpeed={(val) => setSpeed(val)}
-        ></SpeedInput>
+        <Button
+          name="Clear"
+          event={() => clear(rowsNum, columnsNum)}
+          func={setCellsArr}
+        />
 
-        <DropdownMenu
-          selected={selected}
-          changeSelect={(res) => setSelect(res)}
-        ></DropdownMenu>
+        <Button
+          name="Next Step"
+          event={() => nextStep(cellsArr, rowsNum, columnsNum)}
+          func={setCellsArr}
+        />
+
+        <SpeedInput speed={speed} changeSpeed={setSpeed} />
+
+        <DropdownMenu selected={selected} changeSelect={setSelect} />
       </div>
     </div>
   );

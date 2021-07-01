@@ -3,8 +3,7 @@ import React from "react";
 import { clear, clickGenerate, nextStep, update } from "./functions.js";
 
 export const Cell = (props) => {
-  //console.log(props);
-
+  const {} = props;
   return (
     <div
       key={props.index}
