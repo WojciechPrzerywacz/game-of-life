@@ -1,8 +1,33 @@
-export const clear = (rows, column) => {
+export const clear = (rows, columns) => {
   const cellsArrCpy = [];
   for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < column; j++) {
+    for (let j = 0; j < columns; j++) {
       cellsArrCpy.push(false);
+    }
+  }
+  return cellsArrCpy;
+};
+export const update = (index, array) => {
+  let cellsArrCpy = [];
+  cellsArrCpy = [...array];
+  cellsArrCpy[index] = !array[index];
+  return cellsArrCpy;
+};
+
+export const resizeUpdate = (array, rows, columns) => {
+  let cellsArrCpy = [];
+  let helperArr = [...array];
+  //nowa tablica z samymi 0 o odpowiednim rozmiarze
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      cellsArrCpy.push(false);
+    }
+  }
+  //przypisac to co się da z starej do nowej
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      if (helperArr.length > j + i * columns)
+        cellsArrCpy[j + i * columns] = helperArr[j + i * columns];
     }
   }
   return cellsArrCpy;
@@ -10,22 +35,6 @@ export const clear = (rows, column) => {
 
 export const clickGenerate = (index, array, columnsNum, rowsNum, selected) => {
   const cellsArrCpy = [];
-  if (selected === "oneCell") {
-    for (let i = 0; i < rowsNum; i++) {
-      for (let j = 0; j < columnsNum; j++) {
-        if (index === j + i * columnsNum) {
-          if (array[index] === true) {
-            cellsArrCpy.push(false);
-          }
-          if (array[index] === false) {
-            cellsArrCpy.push(true);
-          }
-        } else {
-          cellsArrCpy.push(array[j + i * columnsNum]);
-        }
-      }
-    }
-  }
   if (selected === "threeCells") {
     for (let i = 0; i < rowsNum; i++) {
       for (let j = 0; j < columnsNum; j++) {
@@ -59,6 +68,7 @@ export const clickGenerate = (index, array, columnsNum, rowsNum, selected) => {
       }
     }
   }
+  console.log(cellsArrCpy);
   return cellsArrCpy;
 };
 

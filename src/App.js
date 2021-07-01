@@ -1,10 +1,20 @@
 import "./index.css";
 import React, { useState, useEffect } from "react";
-import { clear, clickGenerate, nextStep } from "./functions.js";
+import {
+  clear,
+  clickGenerate,
+  nextStep,
+  update,
+  resizeUpdate,
+} from "./functions.js";
+import { Cell } from "./Cell";
+import { Button } from "./Button";
+import { SpeedInput } from "./SpeedInput";
+import { DropdownMenu } from "./DropdownMenu";
 
 export default function App() {
-  const heightModifier = Math.floor(window.innerHeight / 30);
-  const widthModifier = Math.floor(window.innerWidth / 30);
+  const heightModifier = Math.floor(window.innerHeight / 60);
+  const widthModifier = Math.floor(window.innerWidth / 60);
   const [rowsNum, setRowsNum] = useState(heightModifier);
   const [columnsNum, setColumnsNum] = useState(widthModifier);
 
@@ -12,7 +22,7 @@ export default function App() {
   const [cellsArr, setCellsArr] = useState(clear(rowsNum, columnsNum));
 
   const [speed, setSpeed] = useState(100);
-  const [selected, setSelect] = useState("oneCell");
+  const [selected, setSelect] = useState("defaultMode");
 
   useEffect(() => {
     const simulate = () => {
@@ -21,80 +31,66 @@ export default function App() {
         setCellsArr(nextStep(cellsArr, rowsNum, columnsNum));
       }
     };
-
-    setTimeout(() => {
-      simulate();
-    }, speed);
+    if (running) {
+      setTimeout(() => {
+        simulate();
+      }, speed);
+    }
   }, [running, cellsArr, columnsNum, rowsNum, speed, selected]);
 
   useEffect(() => {
     const handleResize = () => {
-      setCellsArr(clear(rowsNum, columnsNum));
-      setColumnsNum(widthModifier);
-      setRowsNum(heightModifier);
+      setColumnsNum(Math.floor(window.innerWidth / 50));
+      setRowsNum(Math.floor(window.innerHeight / 50));
+      setCellsArr(resizeUpdate(cellsArr, rowsNum, columnsNum));
     };
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [rowsNum, columnsNum, heightModifier, widthModifier]);
+  }, [rowsNum, columnsNum, heightModifier, widthModifier, cellsArr]);
 
   return (
     <div className="flex">
       <div
         className="cellsGrid"
         style={{
-          display: "grid",
           gridTemplateColumns: `repeat(${columnsNum}, 20px)`,
-          gridGap: "0",
         }}
       >
         {cellsArr.map((value, index) => (
-          <div
-            key={index}
-            style={{
-              height: "20px",
-              width: "20px",
-              border: "1px solid gray",
-              boxSizing: "border-box",
-              WebkitBoxSizing: "border-box",
-            }}
-            onClick={() =>
-              setCellsArr(
-                clickGenerate(index, cellsArr, columnsNum, rowsNum, selected)
-              )
-            }
-            className={value ? "cellAlive" : "cellDead"}
-          ></div>
+          <Cell
+            running={running}
+            rowsNum={rowsNum}
+            columnsNum={columnsNum}
+            index={index}
+            selected={selected}
+            cellsArr={cellsArr}
+            setUpdate={(arr) => setCellsArr(arr)}
+            setGenerated={(arr) => setCellsArr(arr)}
+          ></Cell>
         ))}
       </div>
       <div className="buttons-wrapper">
-        <button
-          onClick={() => setRunning(running ? false : true)}
-          className={"buttons"}
-        >
-          {running ? "Stop Game" : "Start Game"}
-        </button>
-        <button
-          onClick={() => setCellsArr(clear(rowsNum, columnsNum))}
-          className={"buttons"}
-        >
-          Clear
-        </button>
+        <Button
+          rowsNum={rowsNum}
+          columnsNum={columnsNum}
+          running={running}
+          cellsArr={cellsArr}
+          stopGame={(run) => setRunning(run)}
+          clearBoard={(arr) => setCellsArr(arr)}
+          goToNextStep={(arr) => setCellsArr(arr)}
+        ></Button>
 
-        <input
-          type="text"
-          value={speed}
-          onChange={(event) => setSpeed(event.target.value)}
-        />
-        <div className="dropdown">
-          <button className="dropbtn">Dropdown</button>
-          <div className="dropdown-content">
-            <div onClick={() => setSelect("oneCell")}>One Cell</div>
-            <div onClick={() => setSelect("threeCells")}>Three Cells</div>
-            <div onClick={() => setSelect("glider")}>Glider</div>
-          </div>
-        </div>
+        <SpeedInput
+          speed={speed}
+          changeSpeed={(val) => setSpeed(val)}
+        ></SpeedInput>
+
+        <DropdownMenu
+          selected={selected}
+          changeSelect={(res) => setSelect(res)}
+        ></DropdownMenu>
       </div>
     </div>
   );
